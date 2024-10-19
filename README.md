@@ -1,5 +1,6 @@
 ﻿# 内容
-## プロップを常にプレイヤーの方向に向ける（look_player_prop_manager）
+## Device
+### プロップを常にプレイヤーの方向に向ける（look_player_prop_manager）
 - ``UpdateSpan``：更新頻度
     - 単位は秒
     - 0.0 秒に設定すると正常に動作しなくなる
