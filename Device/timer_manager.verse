@@ -4,27 +4,27 @@ using { /Verse.org/Simulation }
 timer_manager := class(creative_device)
 {
     @editable
-    StartTimerTrigger:trigger_device = trigger_device{}
+    StartTimerTrigger<private>:trigger_device = trigger_device{}
 
     @editable
-    StopTimerTrigger:trigger_device = trigger_device{}
+    StopTimerTrigger<private>:trigger_device = trigger_device{}
 
     @editable
-    ResetTimerTrigger:trigger_device = trigger_device{}
+    ResetTimerTrigger<private>:trigger_device = trigger_device{}
 
     @editable
-    StopAndHideTimerTrigger:trigger_device = trigger_device{}
+    StopAndHideTimerTrigger<private>:trigger_device = trigger_device{}
 
     @editable
-    TimerHud:hud_message_device = hud_message_device{}
+    TimerHud<private>:hud_message_device = hud_message_device{}
 
     @editable
-    ShowHours:logic = false
+    ShowHours<private>:logic = false
 
     @editable
-    ShowDecimalFraction:logic = false
+    ShowDecimalFraction<private>:logic = false
 
-    var PlayerTimers:[player]player_timer = map{}
+    var PlayerTimers<private>:[player]player_timer = map{}
 
     OnBegin<override>()<suspends>:void =
 
@@ -36,7 +36,7 @@ timer_manager := class(creative_device)
 
         StopAndHideTimerTrigger.TriggeredEvent.Subscribe(OnTriggeredStopAndHideTimer)
 
-    OnTriggeredStartTimer(TriggeredAgent:?agent):void =
+    OnTriggeredStartTimer<private>(TriggeredAgent:?agent):void =
         
         if(Agent := TriggeredAgent?)
         {
@@ -62,7 +62,7 @@ timer_manager := class(creative_device)
             }
         }
 
-    OnTriggeredStopTimer(TriggeredAgent:?agent):void =
+    OnTriggeredStopTimer<private>(TriggeredAgent:?agent):void =
 
         if(Agent := TriggeredAgent?)
         {
@@ -75,7 +75,7 @@ timer_manager := class(creative_device)
             }
         }
 
-    OnTriggeredResetTimer(TriggeredAgent:?agent):void =
+    OnTriggeredResetTimer<private>(TriggeredAgent:?agent):void =
         
         if(Agent := TriggeredAgent?)
         {
@@ -88,7 +88,7 @@ timer_manager := class(creative_device)
             }
         }
 
-    OnTriggeredStopAndHideTimer(TriggeredAgent:?agent):void =
+    OnTriggeredStopAndHideTimer<private>(TriggeredAgent:?agent):void =
         
         if(Agent := TriggeredAgent?)
         {
@@ -104,17 +104,17 @@ timer_manager := class(creative_device)
 
 player_timer := class
 {
-    var CurrentTime:float = 0.0
+    var CurrentTime<private>:float = 0.0
 
-    var TimerIsActive:logic = false
+    var TimerIsActive<private>:logic = false
 
-    var TimerHud:hud_message_device = hud_message_device{}
+    var TimerHud<private>:hud_message_device = hud_message_device{}
 
-    var ShowHours:logic = false
+    var ShowHours<private>:logic = false
     
-    var ShowDecimalFraction:logic = false
+    var ShowDecimalFraction<private>:logic = false
 
-    PrepareStartTimer(OwnerAgent:agent, _TimerHud:hud_message_device, _ShowHours:logic, _ShowDecimalFraction:logic):void =
+    PrepareStartTimer<public>(OwnerAgent:agent, _TimerHud:hud_message_device, _ShowHours:logic, _ShowDecimalFraction:logic):void =
 
         if(TimerIsActive?)
         {
@@ -133,7 +133,7 @@ player_timer := class
             StartTimer(OwnerAgent)
         }
     
-    StartTimer(OwnerAgent:agent)<suspends>:void =
+    StartTimer<private>(OwnerAgent:agent)<suspends>:void =
 
         UpdateSpan:float = 0.1
 
@@ -153,27 +153,27 @@ player_timer := class
             }
         }
 
-    StopAndHideTimer(OwnerAgent:agent):void =
+    StopAndHideTimer<public>(OwnerAgent:agent):void =
 
         StopTimer()
 
         TimerHud.Hide(OwnerAgent)
 
-    StopTimer():void =
+    StopTimer<public>():void =
 
         set TimerIsActive = false
 
-    ResetTimer():void =
+    ResetTimer<public>():void =
 
         set CurrentTime = 0.0
 
-    UpdateTimerText(OwnerAgent:agent):void =
+    UpdateTimerText<private>(OwnerAgent:agent):void =
 
         TimerHud.Show(OwnerAgent, StringToMessage(GetCurrentTimerText()))
 
-    StringToMessage<localizes>(StringValue:string):message = "{StringValue}"
+    StringToMessage<private><localizes>(StringValue:string):message = "{StringValue}"
     
-    GetCurrentTimerText():string =
+    GetCurrentTimerText<private>():string =
 
         var CurrentTimerText:string = GetCurrentMinutesText() + ":" + GetCurrentSecondsText()
 
@@ -189,7 +189,7 @@ player_timer := class
 
         return CurrentTimerText
 
-    GetCurrentHoursText():string =
+    GetCurrentHoursText<private>():string =
         
         var HoursText:string = ""
 
@@ -207,7 +207,7 @@ player_timer := class
 
         return HoursText
     
-    GetCurrentMinutesText():string =
+    GetCurrentMinutesText<private>():string =
 
         var MinutesText:string = ""
 
@@ -244,7 +244,7 @@ player_timer := class
 
         return MinutesText
 
-    GetCurrentSecondsText():string =
+    GetCurrentSecondsText<private>():string =
         
         var SecondsText:string = ""
 
@@ -265,7 +265,7 @@ player_timer := class
 
         return SecondsText
 
-    GetCurrentDecimalFractionText():string =
+    GetCurrentDecimalFractionText<private>():string =
 
         var DecimalFractionText:string = ""
 
