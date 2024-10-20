@@ -6,25 +6,26 @@ using { /UnrealEngine.com/Temporary/SpatialMath }
 look_player_prop_manager := class(creative_device)
 {
     @editable
-    UpdateSpan:float = 0.01
+    UpdateSpan<private>:float = 0.01
 
     @editable
-    StartFollowingTrigger:trigger_device = trigger_device{}
+    StartFollowingTrigger<private>:trigger_device = trigger_device{}
 
     @editable
-    StopFollowingTrigger:trigger_device = trigger_device{}
+    StopFollowingTrigger<private>:trigger_device = trigger_device{}
 
     @editable
-    TargetPropDataArray:[]prop_data = array{}
+    TargetPropDataArray<private>:[]prop_data = array{}
 
-    var IsFollowing:logic = false
+    var IsFollowing<private>:logic = false
 
     OnBegin<override>()<suspends>:void =
 
         StartFollowingTrigger.TriggeredEvent.Subscribe(PrepareStartFollowing)
+
         StopFollowingTrigger.TriggeredEvent.Subscribe(StopFollowing)
 
-    PrepareStartFollowing(TriggeredAgent:?agent):void =
+    PrepareStartFollowing<private>(TriggeredAgent:?agent):void =
         
         if(IsFollowing?)
         {
@@ -39,7 +40,7 @@ look_player_prop_manager := class(creative_device)
             }
         }
 
-    StartFollowing(TargetAgent:agent)<suspends>:void=
+    StartFollowing<private>(TargetAgent:agent)<suspends>:void=
         
         if(TargetCharacter:fort_character = TargetAgent.GetFortCharacter[])
         {
@@ -84,19 +85,19 @@ look_player_prop_manager := class(creative_device)
                 }
         }
 
-    StopFollowing(TriggeredAgent:?agent):void =
+    StopFollowing<private>(TriggeredAgent:?agent):void =
 
         set IsFollowing = false
 }
 
-prop_data<public> := class<concrete>
+prop_data := class<concrete>
 {
     @editable
-    TargetProp:creative_prop = creative_prop{}
+    TargetProp<public>:creative_prop = creative_prop{}
 
     @editable
-    RotateYaw:logic = true
+    RotateYaw<public>:logic = true
 
     @editable
-    RotatePitch:logic = true
+    RotatePitch<public>:logic = true
 }
