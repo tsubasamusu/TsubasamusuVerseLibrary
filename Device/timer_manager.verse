@@ -47,7 +47,7 @@ timer_manager := class(creative_device)
             {
                 if(PlayerTimer := PlayerTimers[Player])
                 {
-                    PlayerTimer.PrepareStartTimer(Agent, TimerHud, ShowHours, ShowDecimalFraction)
+                    PlayerTimer.PrepareStartTimer(Agent, TimerHud, Self, ShowHours, ShowDecimalFraction)
                 }
                 else
                 {
@@ -55,7 +55,7 @@ timer_manager := class(creative_device)
 
                     if(set PlayerTimers[Player] = CreatedPlayerTimer)
                     {
-                        CreatedPlayerTimer.PrepareStartTimer(Agent, TimerHud, ShowHours, ShowDecimalFraction)
+                        CreatedPlayerTimer.PrepareStartTimer(Agent, TimerHud, Self, ShowHours, ShowDecimalFraction)
                     }
                     else
                     {
@@ -103,6 +103,31 @@ timer_manager := class(creative_device)
                 }
             }
         }
+
+    DestroyInvalidPlayerTimer<public>():void =
+
+        var NewPlayerTimers:[player]player_timer = map{}
+
+        for (Player -> PlayerTimer : PlayerTimers)
+        {
+            if(Player.IsActive[])
+            {
+                set NewPlayerTimers = ConcatenateMaps(NewPlayerTimers, map{Player => PlayerTimer})
+            }
+            else
+            {
+                if(InvalidPlayerTimer := PlayerTimers[Player])
+                {
+                    InvalidPlayerTimer.StopTimer()
+                }
+                else
+                {
+                    Print("Failed to get a player_timer class instance of the invalid player.")
+                }
+            }
+        }
+
+        set PlayerTimers = NewPlayerTimers
 }
 
 player_timer := class
@@ -113,11 +138,13 @@ player_timer := class
 
     var TimerHud<private>:hud_message_device = hud_message_device{}
 
+    var TimerManager:timer_manager = timer_manager{}
+
     var ShowHours<private>:logic = false
     
     var ShowDecimalFraction<private>:logic = false
 
-    PrepareStartTimer<public>(OwnerAgent:agent, _TimerHud:hud_message_device, _ShowHours:logic, _ShowDecimalFraction:logic):void =
+    PrepareStartTimer<public>(OwnerAgent:agent, _TimerHud:hud_message_device, _TimerManager:timer_manager, _ShowHours:logic, _ShowDecimalFraction:logic):void =
 
         if(TimerIsActive?)
         {
@@ -126,6 +153,7 @@ player_timer := class
         
         set TimerIsActive = true
         set TimerHud = _TimerHud
+        set TimerManager = _TimerManager
         set ShowHours = _ShowHours
         set ShowDecimalFraction = _ShowDecimalFraction
 
@@ -179,7 +207,21 @@ player_timer := class
 
         if(TimerIsActive?)
         {
-            TimerHud.Show(OwnerAgent, StringToMessage(GetCurrentTimerText()))
+            if(Player := player[OwnerAgent])
+            {
+                if(Player.IsActive[])
+                {
+                    TimerHud.Show(OwnerAgent, StringToMessage(GetCurrentTimerText()))
+                }
+                else
+                {
+                    TimerManager.DestroyInvalidPlayerTimer()
+                }
+            }
+            else
+            {
+                TimerManager.DestroyInvalidPlayerTimer()
+            }
         }
 
     StringToMessage<private><localizes>(StringValue:string):message = "{StringValue}"
