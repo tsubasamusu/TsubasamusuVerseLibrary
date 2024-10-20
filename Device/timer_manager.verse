@@ -177,7 +177,10 @@ player_timer := class
 
     UpdateTimerText<private>(OwnerAgent:agent):void =
 
-        TimerHud.Show(OwnerAgent, StringToMessage(GetCurrentTimerText()))
+        if(TimerIsActive?)
+        {
+            TimerHud.Show(OwnerAgent, StringToMessage(GetCurrentTimerText()))
+        }
 
     StringToMessage<private><localizes>(StringValue:string):message = "{StringValue}"
     
