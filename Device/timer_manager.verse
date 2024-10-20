@@ -24,6 +24,9 @@ timer_manager := class(creative_device)
     @editable
     ShowDecimalFraction<private>:logic = false
 
+    @editable
+    UpdateDisplayTextOnReset<private>:logic = false
+
     var PlayerTimers<private>:[player]player_timer = map{}
 
     OnBegin<override>()<suspends>:void =
@@ -83,7 +86,7 @@ timer_manager := class(creative_device)
             {
                 if(PlayerTimer := PlayerTimers[Player])
                 {
-                    PlayerTimer.ResetTimer()
+                    PlayerTimer.ResetTimer(Agent, UpdateDisplayTextOnReset)
                 }
             }
         }
@@ -163,9 +166,14 @@ player_timer := class
 
         set TimerIsActive = false
 
-    ResetTimer<public>():void =
+    ResetTimer<public>(OwnerAgent:agent, UpdateDisplayText:logic):void =
 
         set CurrentTime = 0.0
+
+        if(UpdateDisplayText?)
+        {
+            UpdateTimerText(OwnerAgent)
+        }
 
     UpdateTimerText<private>(OwnerAgent:agent):void =
 
