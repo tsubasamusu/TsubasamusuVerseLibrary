@@ -21,11 +21,11 @@ look_player_prop_manager := class(creative_device)
 
     OnBegin<override>()<suspends>:void =
 
-        StartFollowingTrigger.TriggeredEvent.Subscribe(PrepareStartFollowing)
+        StartFollowingTrigger.TriggeredEvent.Subscribe(OnTriggeredStartFollowing)
 
-        StopFollowingTrigger.TriggeredEvent.Subscribe(StopFollowing)
+        StopFollowingTrigger.TriggeredEvent.Subscribe(OnTriggeredStopFollowing)
 
-    PrepareStartFollowing<private>(TriggeredAgent:?agent):void =
+    OnTriggeredStartFollowing<private>(TriggeredAgent:?agent):void =
         
         if(IsFollowing?)
         {
@@ -46,35 +46,53 @@ look_player_prop_manager := class(creative_device)
         {
             set IsFollowing = true
     
-            loop:
-                
+            loop
+            {
                 if(IsFollowing?)
                 {
-                    for(TargetPropData : TargetPropDataArray)
+                    if(Player := player[TargetAgent])
                     {
-                        PropLocation := TargetPropData.TargetProp.GetTransform().Translation
-
-                        CharacterLocation := TargetCharacter.GetTransform().Translation
-
-                        if(LookDirection := (CharacterLocation - PropLocation).MakeUnitVector[])
+                        if(Player.IsActive[])
                         {
-                            var Yaw:float = 0.0
-                            var Pitch:float = 0.0
-
-                            if(TargetPropData.RotateYaw?)
+                            for(TargetPropData : TargetPropDataArray)
                             {
-                                set Yaw = RadiansToDegrees(ArcTan(LookDirection.Y, LookDirection.X))
+                                PropLocation := TargetPropData.TargetProp.GetTransform().Translation
+        
+                                CharacterLocation := TargetCharacter.GetTransform().Translation
+        
+                                if(LookDirection := (CharacterLocation - PropLocation).MakeUnitVector[])
+                                {
+                                    var Yaw:float = 0.0
+                                    var Pitch:float = 0.0
+        
+                                    if(TargetPropData.RotateYaw?)
+                                    {
+                                        set Yaw = RadiansToDegrees(ArcTan(LookDirection.Y, LookDirection.X))
+                                    }
+        
+                                    if(TargetPropData.RotatePitch?)
+                                    {
+                                        set Pitch = RadiansToDegrees(ArcTan(LookDirection.Z, Sqrt((LookDirection.X * LookDirection.X) + (LookDirection.Y * LookDirection.Y))))
+                                    }
+        
+                                    NewRotation := MakeRotationFromYawPitchRollDegrees(Yaw, Pitch, 0.0)
+                                    
+                                    TargetPropData.TargetProp.MoveTo(PropLocation, NewRotation, UpdateSpan)
+                                }
                             }
-
-                            if(TargetPropData.RotatePitch?)
-                            {
-                                set Pitch = RadiansToDegrees(ArcTan(LookDirection.Z, Sqrt((LookDirection.X * LookDirection.X) + (LookDirection.Y * LookDirection.Y))))
-                            }
-
-                            NewRotation := MakeRotationFromYawPitchRollDegrees(Yaw, Pitch, 0.0)
-                            
-                            TargetPropData.TargetProp.MoveTo(PropLocation, NewRotation, UpdateSpan)
                         }
+                        else
+                        {
+                            StopFollowing()
+    
+                            break
+                        }
+                    }
+                    else
+                    {
+                        StopFollowing()
+
+                        break
                     }
 
                     Sleep(UpdateSpan)
@@ -83,9 +101,17 @@ look_player_prop_manager := class(creative_device)
                 {
                     break
                 }
+            }
         }
 
-    StopFollowing<private>(TriggeredAgent:?agent):void =
+    OnTriggeredStopFollowing<private>(TriggeredAgent:?agent):void =
+
+        if(Agent := TriggeredAgent?)
+        {
+            StopFollowing()
+        }
+
+    StopFollowing<private>():void =
 
         set IsFollowing = false
 }
