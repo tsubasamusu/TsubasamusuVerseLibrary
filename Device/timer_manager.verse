@@ -1,9 +1,5 @@
 using { /Fortnite.com/Devices }
 using { /Verse.org/Simulation }
-using { /UnrealEngine.com/Temporary/UI }
-using { /Fortnite.com/UI }
-using { /UnrealEngine.com/Temporary/SpatialMath }
-using { /Verse.org/Colors }
 
 timer_manager := class(creative_device)
 {
@@ -23,13 +19,10 @@ timer_manager := class(creative_device)
     TimerHud:hud_message_device = hud_message_device{}
 
     @editable
-    UpdateSpan:float = 0.1
-
-    @editable
-    ShowDecimalPlace:int = 0
-
-    @editable
     ShowHours:logic = false
+
+    @editable
+    ShowDecimalFraction:logic = false
 
     var PlayerTimers:[player]player_timer = map{}
 
@@ -51,7 +44,7 @@ timer_manager := class(creative_device)
             {
                 if(PlayerTimer := PlayerTimers[Player])
                 {
-                    PlayerTimer.PrepareStartTimer(Agent, TimerHud, UpdateSpan, ShowDecimalPlace, ShowHours)
+                    PlayerTimer.PrepareStartTimer(Agent, TimerHud, ShowHours, ShowDecimalFraction)
                 }
                 else
                 {
@@ -59,7 +52,7 @@ timer_manager := class(creative_device)
 
                     if(set PlayerTimers[Player] = CreatedPlayerTimer)
                     {
-                        CreatedPlayerTimer.PrepareStartTimer(Agent, TimerHud, UpdateSpan, ShowDecimalPlace, ShowHours)
+                        CreatedPlayerTimer.PrepareStartTimer(Agent, TimerHud, ShowHours, ShowDecimalFraction)
                     }
                     else
                     {
@@ -90,7 +83,7 @@ timer_manager := class(creative_device)
             {
                 if(PlayerTimer := PlayerTimers[Player])
                 {
-                    PlayerTimer.ResetTimer(Agent)
+                    PlayerTimer.ResetTimer()
                 }
             }
         }
@@ -115,13 +108,13 @@ player_timer := class
 
     var TimerIsActive:logic = false
 
-    var ShowHours:logic = false
-    
-    var ShowDecimalPlace:int = 0
-    
     var TimerHud:hud_message_device = hud_message_device{}
 
-    PrepareStartTimer(OwnerAgent:agent, _TimerHud:hud_message_device, UpdateSpan:float, _ShowDecimalPlace:int, _ShowHours:logic):void =
+    var ShowHours:logic = false
+    
+    var ShowDecimalFraction:logic = false
+
+    PrepareStartTimer(OwnerAgent:agent, _TimerHud:hud_message_device, _ShowHours:logic, _ShowDecimalFraction:logic):void =
 
         if(TimerIsActive?)
         {
@@ -131,22 +124,24 @@ player_timer := class
         set TimerIsActive = true
         set TimerHud = _TimerHud
         set ShowHours = _ShowHours
-        set ShowDecimalPlace = _ShowDecimalPlace
+        set ShowDecimalFraction = _ShowDecimalFraction
 
         UpdateTimerText(OwnerAgent)
 
         spawn
         {
-            StartTimer(OwnerAgent, UpdateSpan)
+            StartTimer(OwnerAgent)
         }
     
-    StartTimer(OwnerAgent:agent, UpdateSpan:float)<suspends>:void =
+    StartTimer(OwnerAgent:agent)<suspends>:void =
+
+        UpdateSpan:float = 0.1
 
         loop
         {
             if(TimerIsActive?)
             {
-                set CurrentTime += 10.0
+                set CurrentTime += UpdateSpan
 
                 UpdateTimerText(OwnerAgent)
                 
@@ -168,7 +163,7 @@ player_timer := class
 
         set TimerIsActive = false
 
-    ResetTimer(OwnerAgent:agent):void =
+    ResetTimer():void =
 
         set CurrentTime = 0.0
 
@@ -187,7 +182,7 @@ player_timer := class
             set CurrentTimerText = GetCurrentHoursText() + ":" + CurrentTimerText
         }
 
-        if(ShowDecimalPlace > 0)
+        if(ShowDecimalFraction?)
         {
             set CurrentTimerText += "." + GetCurrentDecimalFractionText()
         }
@@ -274,13 +269,13 @@ player_timer := class
 
         var DecimalFractionText:string = ""
 
-        if(Integer := Int[CurrentTime])
+        if(CurrentTimeInt := Int[CurrentTime])
         {
             var DecimalFraction:float = 0.0
             
-            set DecimalFraction = CurrentTime - (Integer * 1.0)
+            set DecimalFraction = CurrentTime - (CurrentTimeInt * 1.0)
 
-            if(DecimalFractionInt := Int[DecimalFraction * (ShowDecimalPlace * 10.0)])
+            if(DecimalFractionInt := Int[DecimalFraction * 10.0])
             {
                 set DecimalFractionText = ToString(DecimalFractionInt)
             }
