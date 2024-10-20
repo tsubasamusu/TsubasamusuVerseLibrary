@@ -20,3 +20,4 @@
 - ``TimerHud``：タイマー表示用の ``hud_message_device``
 - ``ShowHours``：時間（hh）を表示するかどうか
 - ``ShowDecimalFraction``：小数点以下（小数第一位）を表示するかどうか
+- ``UpdateDisplayTextOnReset``：リセット時にテキストの表示を初期化するかどうか
